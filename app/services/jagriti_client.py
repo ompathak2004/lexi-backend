@@ -49,7 +49,9 @@ class JagritiClient:
         start_time = time.time()
         
         # Log request details
-        if params:
+        if params and json_data:
+            self.logger.info(f"🌐 API CALL: {method} {endpoint} - Params: {params} - Data: {json_data}")
+        elif params:
             self.logger.info(f"🌐 API CALL: {method} {endpoint} - Params: {params}")
         elif json_data:
             # Log all data including serchTypeValue
@@ -62,7 +64,7 @@ class JagritiClient:
                 if method.upper() == "GET":
                     response = await client.get(url, params=params, headers=self.headers)
                 elif method.upper() == "POST":
-                    response = await client.post(url, json=json_data, headers=self.headers)
+                    response = await client.post(url, params=params, json=json_data, headers=self.headers)
                 else:
                     raise ValueError(f"Unsupported method: {method}")
                 
@@ -125,9 +127,10 @@ class JagritiClient:
     async def get_judges(self, commission_id: int) -> Dict[str, Any]:
         """Get judges by commission ID"""
         return await self._make_request(
-            method="GET",
+            method="POST",
             endpoint="/services/master/master/v2/getJudgeListForHearing",
-            params={"commissionId": commission_id, "activeStatus": True}
+            params={"commissionId": commission_id, "activeStatus": True},
+            json_data={}
         )
     
     async def search_cases(
